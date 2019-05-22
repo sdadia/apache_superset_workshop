@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: "2010-09-09"  
+Description: Describes how to add custom instructions after starting ec2 instance
+Parameters:
+  KeyPairName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+Resources:  
+  SupersetEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-08d658f84a6d84a80
+      KeyName: 
+        Ref: KeyPairName
+      SecurityGroups:
+        - !Ref SupersetEC2InstanceSG
+  SupersetEC2InstanceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription : Opens port 8080 for accessing superset website on EC2 Instance from anywhere and port 22 for accessing via ssh from anywhere
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '8080'
+        ToPort: '8080'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
+  SupersetRDS:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: 20
+      DBInstanceIdentifier: cfsupersetrds
+      DBInstanceClass: db.t2.micro
+      Engine: postgres
+      MasterUsername: admin123
+      MasterUserPassword: admin1234567890
+      MultiAZ: false
+      PubliclyAccessible: true
+      DBSecurityGroups:
+        - !Ref SupersetRDSSG
+  SupersetRDSSG:
+    Type: AWS::RDS::DBSecurityGroup
+    Properties:
+      GroupDescription : Security Group for RDS public Access
+      DBSecurityGroupIngress:
+        - CIDRIP: 0.0.0.0/0
+Outputs:
+  PublicIPSupersetEC2Instance:
+    Description: Public IP address of the newly created EC2 instance
+    Value: !GetAtt SupersetEC2Instance.PublicIp
+  DBEndpointPostgresRDS:
+    Description: The connection endpoint for the database.
+    Value: !GetAtt  SupersetRDS.Endpoint.Address
+  
