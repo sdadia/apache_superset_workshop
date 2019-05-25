@@ -3,11 +3,20 @@
 ## Installation on Ubuntu
 
 
+
+
 #### Dependencies
 ``` bash
 sudo apt update -qq
 sudo apt install -y python3 python3-pip
 sudo apt-get install -y  -qq build-essential libssl-dev libffi-dev libsasl2-dev libldap2-dev
+
+## these lines for mac
+brew install python
+brew install pkg-config libffi openssl python
+env LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" pip install cryptography==2.4.2
+
+
 sudo pip3 install pandas==0.23.4 SQLAlchemy==1.2.2 psycopg2-binary pymssql superset 
 sudo chmod  777 /usr/local/lib/python3.5/dist-packages/superset
 ```
